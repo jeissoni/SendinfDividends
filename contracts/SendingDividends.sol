@@ -42,9 +42,10 @@ contract SendingDividends {
     ) external {
         uint256 total = 0;
         for (uint256 i = 0; i < recipients.length; i++) {
-            total += values[i];
-            require(token.transferFrom(msg.sender, address(this), total));
+            total += values[i];            
         }
+        require(token.transferFrom(msg.sender, address(this), total));
+        
         for (uint256 i = 0; i < recipients.length; i++) {
             require(token.transfer(recipients[i], values[i]));
         }
