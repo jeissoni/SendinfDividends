@@ -1,10 +1,10 @@
 
 const assert = require('assert');
 const hardhat = require("hardhat");
-const {etherjs, BigNumber} = require('ethers');
+const {etherjs, BigNumber, utils} = require('ethers');
 
 
-let Token;
+let prov ;
 let contracDeployed;
 let tressDeployed;
 // let owner;
@@ -31,32 +31,50 @@ beforeEach(async function(){
     tres = await ethers.getContractFactory("XVORTEX");
 
 
-    [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
+    [addr0, addr1, addr2, addr3, addr4] = await ethers.getSigners();
 
     contracDeployed = await sendingDividends.deploy();   
     tressDeployed = await tres.deploy(name,symbol,supply.toString());
 
-    
+    prov = ethers.getDefaultProvider();
 });
+
+
+
+
+
 
 describe("Deployment Sending Dividends", function () {
 
-    it("Should set the right owner", async function () {
-        assert.equal(await contracDeployed.owner(), owner.address, "The address is not the owner");
-    });
+    
+    it("disperseEther function", async()=>{
+        
+        //let mire = await prov.getBalance(addr0.ge)
+        //console.log((await addr0.getBalance()).toString());
+        //let sending = BigNumber.from('10').pow(18).mul(1);
+        let sending = utils.parseEther("1.0");
+        let recipients = [addr1.address.toString(), addr2.address.toString()];
+        let values = [sending, sending];
+        await contracDeployed.disperseEther(
+            recipients,
+            values,
+            {from : addr0.address}            
+        );
 
-    it("disperseTokenSimple funtion", async () => {
+    })
+
+    it("disperseTokenSimple funtion", async () => {      
+
         let sending = BigNumber.from('10').pow(18).mul(1000);
         let recipients = [addr1.address.toString(), addr2.address.toString()];
         let values = [sending, sending];
-
         await tressDeployed.approve(contracDeployed.address, sending.mul(2));
 
         await contracDeployed.disperseTokenSimple(
             tressDeployed.address.toString(),
             recipients,
             values, {
-                from: owner.address
+                from: addr0.address
             }
         );
         
@@ -76,7 +94,7 @@ describe("Deployment Sending Dividends", function () {
             tressDeployed.address.toString(),
             recipients,
             values,
-            {from: owner.address}
+            {from: addr0.address}
         );
 
         assert.equal(await tressDeployed.balanceOf(addr1.address),sending.toString(),"adrres1 fallo")   
@@ -89,7 +107,7 @@ describe("Deployment Sending Dividends", function () {
 
 describe ("Smart Contract TRESS", function(){
     it("Direction is Pausable", async function(){
-        assert.equal(await tressDeployed.isPauser(owner.address), true, "Direction is not pausable")
+        assert.equal(await tressDeployed.isPauser(addr0.address), true, "Direction is not pausable")
     });
 
     
@@ -99,14 +117,14 @@ describe ("Smart Contract TRESS", function(){
 
 
     it("Supply belongs to the account you display", async function(){
-        assert.equal(await tressDeployed.balanceOf(owner.address), supply.toString(), "Account that displays does not have all the supply")
+        assert.equal(await tressDeployed.balanceOf(addr0.address), supply.toString(), "Account that displays does not have all the supply")
     });
 
     it("Sending token", async() => {
         let sending = BigNumber.from('10').pow(18).mul(1000);
-        await tressDeployed.transfer(addr1.address, sending.toString(), {from : owner.address});
+        await tressDeployed.transfer(addr1.address, sending.toString(), {from : addr0.address});
         assert.equal(await tressDeployed.balanceOf(addr1.address), sending.toString(), "Failed to receive tokens");
-        assert.equal(await tressDeployed.balanceOf(owner.address), supply.sub(sending).toString(), "Failed to sending tokens");
+        assert.equal(await tressDeployed.balanceOf(addr0.address), supply.sub(sending).toString(), "Failed to sending tokens");
     });
 
 });
