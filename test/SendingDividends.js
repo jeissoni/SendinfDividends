@@ -11,7 +11,7 @@ let tressDeployed;
 // let addr1;
 // let addr2;
 
-let owner
+let addr0
 let addr1
 let addr2
 //let addr3
@@ -49,18 +49,27 @@ describe("Deployment Sending Dividends", function () {
     
     it("disperseEther function", async()=>{
         
-        //let mire = await prov.getBalance(addr0.ge)
-        //console.log((await addr0.getBalance()).toString());
-        //let sending = BigNumber.from('10').pow(18).mul(1);
-        let sending = utils.parseEther("1.0");
+        console.log((await addr0.getBalance()).toString());
+        let sending = BigNumber.from('10').pow(18).mul(1);
+
+
         let recipients = [addr1.address.toString(), addr2.address.toString()];
         let values = [sending, sending];
+        let balanceAddr1 = await addr1.getBalance();
+        let balanceAddr2 = await addr2.getBalance();
+        
+
         await contracDeployed.disperseEther(
             recipients,
             values,
-            {from : addr0.address}            
+            {from : addr0.address, value: sending.mul(2)}            
         );
 
+
+        // console.log(balanceAddr1)
+        // console.log("addr2_" + (await addr2.getBalance()).toString())
+        assert.equal((await addr1.getBalance()).toString(), balanceAddr1.add(sending).toString())
+        assert.equal((await addr2.getBalance()).toString(), balanceAddr2.add(sending).toString())
     })
 
     it("disperseTokenSimple funtion", async () => {      

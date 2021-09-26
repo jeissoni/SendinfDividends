@@ -17,21 +17,22 @@ interface IERC20 {
 contract SendingDividends {
     
     function disperseEther(
-        address payable[] memory recipients,
+        address [] memory recipients,
         uint256[] memory values
     ) external payable {
 
-        for (uint256 i = 0; i < recipients.length; i++) {
-            console.log("Imprimir addres", recipients[i]);
-            console.log("Valor", values[i]);
-            console.log("balance", msg.sender.balance);
-            recipients[i].transfer(values[i]);
-            console.log("erro o que?");
-            uint256 balance = address(this).balance;
-            
-            if (balance > 0)
+        for (uint256 i = 0; i < recipients.length; i++) {              
+            payable(recipients[i]).transfer(values[i]);                    
+        }
+
+        uint256 balance = address(this).balance;
+             
+        // console.log(address(this));
+
+        if (balance > 0){
                 payable(msg.sender).transfer(balance);
         }
+        
     }
 
     function disperseToken(
@@ -55,7 +56,8 @@ contract SendingDividends {
         address[] memory recipients,
         uint256[] memory values
     ) external {
-        for (uint256 i = 0; i < recipients.length; i++)
+        for (uint256 i = 0; i < recipients.length; i++){
             require(token.transferFrom(msg.sender, recipients[i], values[i]));
+        }
     }
 }
